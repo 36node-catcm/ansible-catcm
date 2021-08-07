@@ -1,0 +1,44 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: "{{ ingress_name }}"
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: "{{ cert_issuer }}"
+spec:
+  rules:
+    - host: library.{{ domain }}
+      http:
+        paths:
+          - backend:
+              serviceName: library-web
+              servicePort: 80
+            path: /
+    - host: livedata.{{ domain }}
+      http:
+        paths:
+          - backend:
+              serviceName: livedata-web
+              servicePort: 80
+            path: /
+    - host: api.{{ domain }}
+      http:
+        paths:
+          - backend:
+              serviceName: library-core
+              servicePort: 80
+            path: "{{ library_core_path }}"
+    - host: api.{{ domain }}
+      http:
+        paths:
+          - backend:
+              serviceName: livedata-core
+              servicePort: 80
+            path: "{{ livedata_core_path }}"
+  tls:
+    - hosts:
+        - "library.{{ domain }}"
+        - "livedata.{{ domain }}"
+        - "api.{{ domain }}"
+      secretName: "{{ domain }}"

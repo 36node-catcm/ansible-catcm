@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: livedata-core
+  labels:
+    app: livedata-core
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: livedata-core
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livedata-core
+  labels:
+    app: livedata-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: livedata-core
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: livedata-core
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: livedata-core
+          image: "{{ livedata_core_image }}"
+          env:
+            - name: DEPLOY_TIME
+              value: "{{ livedata_core_time }}"
+            - name: PORT
+              value: "{{ livedata_core_port }}"
+            - name: BASE
+              value: "{{ livedata_core_path }}"
+            - name: MONGODB_CONNECTION
+              value: "{{ livedata_core_mongodb_connection }}"
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: "{{ livedata_core_health_path }}"
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          livenessProbe:
+            httpGet:
+              path: "{{ livedata_core_health_path }}"
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 60
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+            requests:
+              cpu: "10m"
+              memory: "32Mi"

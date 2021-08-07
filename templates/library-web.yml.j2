@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: library-web
+  labels:
+    app: library-web
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: library-web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: library-web
+  labels:
+    app: library-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: library-web
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: library-web
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: library-web
+          image: "{{ library_web_image }}"
+          env:
+            - name: DEPLOY_TIME
+              value: "{{ library_web_time }}"
+            - name: REACT_APP_CORE_BASE
+              value: "{{ library_web_core_base }}"
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+            requests:
+              cpu: "10m"
+              memory: "32Mi"

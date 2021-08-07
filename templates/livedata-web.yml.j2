@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: livedata-web
+  labels:
+    app: livedata-web
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: livedata-web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livedata-web
+  labels:
+    app: livedata-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: livedata-web
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: livedata-web
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: livedata-web
+          image: "{{ livedata_web_image }}"
+          env:
+            - name: DEPLOY_TIME
+              value: "{{ livedata_web_time }}"
+            - name: REACT_APP_CORE_BASE
+              value: "{{ livedata_web_core_base }}"
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+            requests:
+              cpu: "10m"
+              memory: "32Mi"
