@@ -33,6 +33,6 @@ livedata_core_health_path: /livedata/core/v0/health
 livedata_core_time: 20210804120000
 
 livedata_web_version: latest
-livedata_web_image: "registry.cn-hongkong.aliyuncs.com/36node/catcm-livedata:{{ livedata_web_version }}"
+livedata_web_image: "registry.cn-beijing.aliyuncs.com/36node/catcm-livedata:{{ livedata_web_version }}"
 livedata_web_core_base: https://api.livedata.catcm.36node.com/core/v0
 livedata_web_time: 20210804120000
