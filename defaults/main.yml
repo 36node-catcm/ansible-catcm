@@ -25,7 +25,7 @@ library_web_core_base: https://api.library.catcm.36node.com/core/v0
 library_web_time: 20210804120000
 
 livedata_core_version: latest
-livedata_core_image: "registry.cn-hongkong.aliyuncs.com/36node/catcm-livedata-core:{{ livedata_core_version }}"
+livedata_core_image: "registry.cn-beijing.aliyuncs.com/36node/catcm-livedata-core:{{ livedata_core_version }}"
 livedata_core_port: "80"
 livedata_core_path: /livedata/core/v0
 livedata_core_mongodb_connection: "{{ mongodb_connection }}/livedata-core?authSource=admin"
