@@ -39,6 +39,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: livedata-core
+          imagePullPolicy: "{{ image_pull_policy }}"
           image: "{{ livedata_core_image }}"
           env:
             - name: DEPLOY_TIME

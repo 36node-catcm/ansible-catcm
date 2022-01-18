@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: library-web
+  name: treatment-web
   labels:
-    app: library-web
+    app: treatment-web
 spec:
   type: ClusterIP
   ports:
@@ -12,19 +12,19 @@ spec:
       port: 80
       targetPort: 80
   selector:
-    app: library-web
+    app: treatment-web
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: library-web
+  name: treatment-web
   labels:
-    app: library-web
+    app: treatment-web
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: library-web
+      app: treatment-web
   minReadySeconds: 10
   strategy:
     type: RollingUpdate
@@ -34,18 +34,28 @@ spec:
   template:
     metadata:
       labels:
-        app: library-web
+        app: treatment-web
     spec:
       restartPolicy: Always
       containers:
-        - name: library-web
+        - name: treatment-web
           imagePullPolicy: "{{ image_pull_policy }}"
-          image: "{{ library_web_image }}"
+          image: "{{ treatment_web_image }}"
           env:
             - name: DEPLOY_TIME
-              value: "{{ library_web_time }}"
+              value: "{{ treatment_web_time }}"
+            - name: REACT_APP_TITLE
+              value: "民间中医特色诊疗技术信息管理系统"
+            - name: REACT_APP_SYS_TYPE
+              value: "TREATMENT"
             - name: REACT_APP_CORE_BASE
-              value: "{{ library_web_core_base }}"
+              value: "{{ treatment_web_core_base }}"
+            - name: REACT_APP_ROOT_NS
+              value: "{{ treatment_web_root_ns }}"
+            - name: REACT_APP_AUTH_PROVIDER
+              value: "{{ treatment_web_auth_provider }}"
+            - name: REACT_APP_OSS_BUCKET
+              value: "{{ treatment_web_oss_bucket }}"
           ports:
             - name: http
               containerPort: 80

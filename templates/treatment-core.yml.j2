@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: library-core
+  name: treatment-core
   labels:
-    app: library-core
+    app: treatment-core
 spec:
   type: ClusterIP
   ports:
@@ -12,19 +12,19 @@ spec:
       port: 80
       targetPort: 80
   selector:
-    app: library-core
+    app: treatment-core
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: library-core
+  name: treatment-core
   labels:
-    app: library-core
+    app: treatment-core
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: library-core
+      app: treatment-core
   minReadySeconds: 10
   strategy:
     type: RollingUpdate
@@ -34,34 +34,34 @@ spec:
   template:
     metadata:
       labels:
-        app: library-core
+        app: treatment-core
     spec:
       restartPolicy: Always
       containers:
-        - name: library-core
+        - name: treatment-core
           imagePullPolicy: "{{ image_pull_policy }}"
-          image: "{{ library_core_image }}"
+          image: "{{ treatment_core_image }}"
           env:
             - name: DEPLOY_TIME
-              value: "{{ library_core_time }}"
+              value: "{{ treatment_core_time }}"
             - name: PORT
-              value: "{{ library_core_port }}"
+              value: "{{ treatment_core_port }}"
             - name: BASE
-              value: "{{ library_core_path }}"
+              value: "{{ treatment_core_path }}"
             - name: MONGODB_CONNECTION
-              value: "{{ library_core_mongodb_connection }}"
+              value: "{{ treatment_core_mongodb_connection }}"
           ports:
             - name: http
               containerPort: 80
           readinessProbe:
             httpGet:
-              path: "{{ library_core_health_path }}"
+              path: "{{ treatment_core_health_path }}"
               port: 80
             initialDelaySeconds: 5
             periodSeconds: 60
           livenessProbe:
             httpGet:
-              path: "{{ library_core_health_path }}"
+              path: "{{ treatment_core_health_path }}"
               port: 80
             initialDelaySeconds: 5
             periodSeconds: 60
