@@ -54,4 +54,5 @@ treatment_web_core_base: "https://api.{{ domain }}/treatment/core/v0"
 treatment_web_time: 20210804120000
 treatment_web_root_ns: /catcm_uat
 treatment_web_auth_provider: 61c174bbc4a169001220e7b9
+treatment_web_auth_base: https://api.stargate.36node.com/auth/v0
 treatment_web_oss_bucket: 36node-upload-test
