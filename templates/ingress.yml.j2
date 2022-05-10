@@ -6,6 +6,16 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: traefik
     cert-manager.io/cluster-issuer: "{{ cert_issuer }}"
+    # Forces HTTPS
+    ingress.kubernetes.io/ssl-redirect: "true"
+    # Forces a Permanent (301) redirect
+    ingress.kubernetes.io/redirect-permanent: "true"
+    # Specifies a regex for which URLs to redirect
+    ingress.kubernetes.io/redirect-regex: "^https://www.{{ domain }}/?(.*)"
+    # Here is where redirected URLs will end up
+    #   Notice the $3, which is the third capture
+    #   group from the above regex
+    ingress.kubernetes.io/redirect-replacement: "https://{{ domain }}/$1"
 spec:
   rules:
     - host: library.{{ domain }}
@@ -50,10 +60,30 @@ spec:
               serviceName: treatment-core
               servicePort: 80
             path: "{{ treatment_core_path }}"
+    - host: www.{{ domain }}
+      http:
+        paths:
+          - backend:
+              serviceName: www-web
+              servicePort: 80
+            path: "/"
+    - host: "{{ domain }}"
+      http:
+        paths:
+          - backend:
+              serviceName: www-web
+              servicePort: 80
+            path: "/"
+          - backend:
+              serviceName: www-service
+              servicePort: 80
+            path: "/service"
   tls:
     - hosts:
         - "library.{{ domain }}"
         - "livedata.{{ domain }}"
         - "treatment.{{ domain }}"
         - "api.{{ domain }}"
+        - "www.{{ domain }}"
+        - "{{ domain }}"
       secretName: "{{ domain }}"
