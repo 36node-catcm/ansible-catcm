@@ -58,9 +58,11 @@ treatment_web_auth_base: https://api.stargate.36node.com/auth/v0
 treatment_web_oss_bucket: 36node-upload-test
 
 www_web_time: 20220509
-www_web_image: "registry.cn-beijing.aliyuncs.com/cacms/cacms_ui:1.0"
+www_web_image_version: "1.1"
+www_web_image: "registry.cn-beijing.aliyuncs.com/cacms/cacms_ui:{{ www_web_image_version }}"
 www_service_time: 20220509
-www_service_image: "registry.cn-beijing.aliyuncs.com/cacms/cacms:1.0"
+www_service_image_version: "1.1"
+www_service_image: "registry.cn-beijing.aliyuncs.com/cacms/cacms:{{ www_service_image_version }}"
 www_service_mysql_url: "jdbc:mysql://mysql:3306/xlsy?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC"
 www_service_mysql_username: "root"
 www_service_mysql_password: "754d59aebbfc"
