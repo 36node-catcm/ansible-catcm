@@ -6,6 +6,7 @@ state: present
 catcm_state: "{{ state }}"
 catcm_namespace: "{{ namespace }}"
 image_pull_policy: Always
+ingress_class: traefik
 
 ingress_name: catcm
 domain: catcm.36node.com

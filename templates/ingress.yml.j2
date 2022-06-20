@@ -1,10 +1,9 @@
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: "{{ ingress_name }}"
   annotations:
-    kubernetes.io/ingress.class: traefik
     cert-manager.io/cluster-issuer: "{{ cert_issuer }}"
     # Forces HTTPS
     ingress.kubernetes.io/ssl-redirect: "true"
@@ -17,67 +16,95 @@ metadata:
     #   group from the above regex
     ingress.kubernetes.io/redirect-replacement: "https://{{ domain }}/$1"
 spec:
+  ingressClassName: "{{ ingress_class }}"
   rules:
     - host: library.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: library-web
-              servicePort: 80
-            path: /
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: library-web
+                port: 
+                  number: 80
     - host: livedata.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: livedata-web
-              servicePort: 80
-            path: /
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: livedata-web
+                port: 
+                  number: 80
     - host: treatment.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: treatment-web
-              servicePort: 80
-            path: /
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: treatment-web
+                port: 
+                  number: 80
     - host: api.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: library-core
-              servicePort: 80
-            path: "{{ library_core_path }}"
+          - path: "{{ library_core_path }}"
+            pathType: Prefix
+            backend:
+              service:
+                name: library-core
+                port: 
+                  number: 80
     - host: api.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: livedata-core
-              servicePort: 80
-            path: "{{ livedata_core_path }}"
+          - path: "{{ livedata_core_path }}"
+            pathType: Prefix
+            backend:
+              service:
+                name: livedata-core
+                port: 
+                  number: 80
     - host: api.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: treatment-core
-              servicePort: 80
-            path: "{{ treatment_core_path }}"
+          - path: "{{ treatment_core_path }}"
+            pathType: Prefix
+            backend:
+              service:
+                name: treatment-core
+                port: 
+                  number: 80
     - host: www.{{ domain }}
       http:
         paths:
-          - backend:
-              serviceName: www-web
-              servicePort: 80
-            path: "/"
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: www-web
+                port: 
+                  number: 80
     - host: "{{ domain }}"
       http:
         paths:
-          - backend:
-              serviceName: www-web
-              servicePort: 80
-            path: "/"
-          - backend:
-              serviceName: www-service
-              servicePort: 80
-            path: "/service"
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: www-web
+                port: 
+                  number: 80
+          - path: "/service"
+            pathType: Prefix
+            backend:
+              service:
+                name: www-service
+                port: 
+                  number: 80
   tls:
     - hosts:
         - "library.{{ domain }}"
