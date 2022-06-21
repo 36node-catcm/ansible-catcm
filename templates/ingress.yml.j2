@@ -1,12 +1,22 @@
 ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: "{{ ingress_name }}"
   annotations:
+    kubernetes.io/ingress.class: "{{ ingress_class }}"
     cert-manager.io/cluster-issuer: "{{ cert_issuer }}"
     # Forces HTTPS
-    ingress.kubernetes.io/ssl-redirect: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ catcm_namespace }}-redirect-https@kubernetescrd"
     # Forces a Permanent (301) redirect
     ingress.kubernetes.io/redirect-permanent: "true"
     # Specifies a regex for which URLs to redirect
@@ -16,13 +26,12 @@ metadata:
     #   group from the above regex
     ingress.kubernetes.io/redirect-replacement: "https://{{ domain }}/$1"
 spec:
-  ingressClassName: "{{ ingress_class }}"
   rules:
     - host: library.{{ domain }}
       http:
         paths:
           - path: /
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: library-web
@@ -32,7 +41,7 @@ spec:
       http:
         paths:
           - path: /
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: livedata-web
@@ -42,7 +51,7 @@ spec:
       http:
         paths:
           - path: /
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: treatment-web
@@ -52,7 +61,7 @@ spec:
       http:
         paths:
           - path: "{{ library_core_path }}"
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: library-core
@@ -62,7 +71,7 @@ spec:
       http:
         paths:
           - path: "{{ livedata_core_path }}"
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: livedata-core
@@ -72,7 +81,7 @@ spec:
       http:
         paths:
           - path: "{{ treatment_core_path }}"
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: treatment-core
@@ -82,7 +91,7 @@ spec:
       http:
         paths:
           - path: "/"
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: www-web
@@ -92,14 +101,14 @@ spec:
       http:
         paths:
           - path: "/"
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: www-web
                 port: 
                   number: 80
           - path: "/service"
-            pathType: Prefix
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: www-service
