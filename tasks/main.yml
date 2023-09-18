@@ -13,14 +13,17 @@
     namespace: "{{ catcm_namespace }}"
     template: "{{ item }}"
   with_items:
+    - auth.yml.j2
+    - backup.yml.j2
+    - ingress.yml.j2
     - library-core.yml.j2
     - library-web.yml.j2
     - livedata-core.yml.j2
     - livedata-web.yml.j2
+    - treatment-auth.yml.j2
     - treatment-core.yml.j2
     - treatment-web.yml.j2
-    - ingress.yml.j2
-    - www-web.yml.j2
     - www-service.yml.j2
+    - www-web.yml.j2
   tags:
     - catcm

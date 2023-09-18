@@ -37,6 +37,26 @@ spec:
                 name: library-web
                 port: 
                   number: 80
+    - host: library.{{ domain }}
+      http:
+        paths:
+          - path: "{{ library_core_path }}"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: library-core
+                port: 
+                  number: 80
+    - host: library.{{ domain }}
+      http:
+        paths:
+          - path: "{{ auth_path }}"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: auth
+                port: 
+                  number: 80
     - host: livedata.{{ domain }}
       http:
         paths:
@@ -45,6 +65,26 @@ spec:
             backend:
               service:
                 name: livedata-web
+                port: 
+                  number: 80
+    - host: livedata.{{ domain }}
+      http:
+        paths:
+          - path: "{{ livedata_core_path }}"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: livedata-core
+                port: 
+                  number: 80
+    - host: livedata.{{ domain }}
+      http:
+        paths:
+          - path: "{{ auth_path }}"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: auth
                 port: 
                   number: 80
     - host: treatment.{{ domain }}
@@ -57,27 +97,7 @@ spec:
                 name: treatment-web
                 port: 
                   number: 80
-    - host: api.{{ domain }}
-      http:
-        paths:
-          - path: "{{ library_core_path }}"
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: library-core
-                port: 
-                  number: 80
-    - host: api.{{ domain }}
-      http:
-        paths:
-          - path: "{{ livedata_core_path }}"
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: livedata-core
-                port: 
-                  number: 80
-    - host: api.{{ domain }}
+    - host: treatment.{{ domain }}
       http:
         paths:
           - path: "{{ treatment_core_path }}"
@@ -85,6 +105,16 @@ spec:
             backend:
               service:
                 name: treatment-core
+                port: 
+                  number: 80
+    - host: treatment.{{ domain }}
+      http:
+        paths:
+          - path: "{{ auth_path }}"
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: treatment-auth
                 port: 
                   number: 80
     - host: www.{{ domain }}
@@ -114,12 +144,26 @@ spec:
                 name: www-service
                 port: 
                   number: 80
+
+{% if backup.enabled %}
+    - host: webdav.{{ domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backup-webdav
+                port: 
+                  number: 80
+{% endif %}
+
   tls:
     - hosts:
         - "library.{{ domain }}"
         - "livedata.{{ domain }}"
         - "treatment.{{ domain }}"
-        - "api.{{ domain }}"
+        - "webdav.{{ domain }}"
         - "www.{{ domain }}"
         - "{{ domain }}"
       secretName: "{{ domain }}"

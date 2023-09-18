@@ -1,0 +1,301 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+{% if backup.enabled %}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-backup
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: "{{ backup.storageSize | default('2Gi') }}"
+  storageClassName: "{{ backup.storageClass | default(fs_storage_class) }}"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backup-webdav
+  labels:
+    app: backup-webdav
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: backup-webdav
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backup-webdav
+  labels:
+    app: backup-webdav
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backup-webdav
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: backup-webdav
+        name: backup-webdav
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: backup-webdav
+          image: bytemark/webdav
+          imagePullPolicy: "{{ image_pull_policy | default('IfNotPresent') }}"
+          env:
+            - name: AUTH_TYPE
+              value: Basic
+            - name: USERNAME
+              value: walle
+            - name: PASSWORD
+              value: 4dijrvwowiedvn
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: backup-pv
+              mountPath: /var/lib/dav/data
+      volumes:
+        - name: backup-pv
+          persistentVolumeClaim:
+            claimName: pvc-backup
+
+---
+
+# 配置参考 https://github.com/36node-fcp/devops/blob/main/v2-backup/docker/mongo-cleanandbackup/README.MD
+# 每天2点备份数据
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-db-catcm-auth
+  labels:
+    app: backup-db-catcm-auth
+spec:
+  schedule: "{{ backup.schedule | default('05 03 * * *') }}"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backup-db-catcm-auth
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup-mongodb
+              image: "{{ backup.image | default('registry.cn-beijing.aliyuncs.com/36node/mongo-cleanandbackup') }}:{{ backup.image_tag | default('v0.1') }}"
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGO_URI
+                  value: "{{ mongodb_connection }}"
+                - name: MONGO_FILE_PREFIX
+                  value: "{{ namespace }}"
+                - name: BACKUP_LATEST_FILE
+                  value: catcm-auth.tar.gz
+                - name: BACKUP_SAVE_NUMS
+                  value: "{{ backup.retention | default(3) }}"
+                - name: MONGO_DB
+                  value: catcm-auth
+              volumeMounts:
+                - name: backup-pv
+                  mountPath: /backup
+                  subPath: db
+          volumes:
+            - name: backup-pv
+              persistentVolumeClaim:
+                claimName: pvc-backup
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-db-catcm-library-core
+  labels:
+    app: backup-db-catcm-library-core
+spec:
+  schedule: "{{ backup.schedule | default('05 03 * * *') }}"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backup-db-catcm-library-core
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup-mongodb
+              image: "{{ backup.image | default('registry.cn-beijing.aliyuncs.com/36node/mongo-cleanandbackup') }}:{{ backup.image_tag | default('v0.1') }}"
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGO_URI
+                  value: "{{ mongodb_connection }}"
+                - name: MONGO_FILE_PREFIX
+                  value: "{{ namespace }}"
+                - name: BACKUP_LATEST_FILE
+                  value: catcm-library-core.tar.gz
+                - name: BACKUP_SAVE_NUMS
+                  value: "{{ backup.retention | default(3) }}"
+                - name: MONGO_DB
+                  value: catcm-library-core
+              volumeMounts:
+                - name: backup-pv
+                  mountPath: /backup
+                  subPath: db
+          volumes:
+            - name: backup-pv
+              persistentVolumeClaim:
+                claimName: pvc-backup
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-db-catcm-livedata-core
+  labels:
+    app: backup-db-catcm-livedata-core
+spec:
+  schedule: "{{ backup.schedule | default('05 03 * * *') }}"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backup-db-catcm-livedata-core
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup-mongodb
+              image: "{{ backup.image | default('registry.cn-beijing.aliyuncs.com/36node/mongo-cleanandbackup') }}:{{ backup.image_tag | default('v0.1') }}"
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGO_URI
+                  value: "{{ mongodb_connection }}"
+                - name: MONGO_FILE_PREFIX
+                  value: "{{ namespace }}"
+                - name: BACKUP_LATEST_FILE
+                  value: catcm-livedata-core.tar.gz
+                - name: BACKUP_SAVE_NUMS
+                  value: "{{ backup.retention | default(3) }}"
+                - name: MONGO_DB
+                  value: catcm-livedata-core
+              volumeMounts:
+                - name: backup-pv
+                  mountPath: /backup
+                  subPath: db
+          volumes:
+            - name: backup-pv
+              persistentVolumeClaim:
+                claimName: pvc-backup
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-db-catcm-treatment-auth
+  labels:
+    app: backup-db-catcm-treatment-auth
+spec:
+  schedule: "{{ backup.schedule | default('05 03 * * *') }}"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backup-db-catcm-treatment-auth
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup-mongodb
+              image: "{{ backup.image | default('registry.cn-beijing.aliyuncs.com/36node/mongo-cleanandbackup') }}:{{ backup.image_tag | default('v0.1') }}"
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGO_URI
+                  value: "{{ mongodb_connection }}"
+                - name: MONGO_FILE_PREFIX
+                  value: "{{ namespace }}"
+                - name: BACKUP_LATEST_FILE
+                  value: catcm-treatment-auth.tar.gz
+                - name: BACKUP_SAVE_NUMS
+                  value: "{{ backup.retention | default(3) }}"
+                - name: MONGO_DB
+                  value: catcm-treatment-auth
+              volumeMounts:
+                - name: backup-pv
+                  mountPath: /backup
+                  subPath: db
+          volumes:
+            - name: backup-pv
+              persistentVolumeClaim:
+                claimName: pvc-backup
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-db-catcm-treatment-core
+  labels:
+    app: backup-db-catcm-treatment-core
+spec:
+  schedule: "{{ backup.schedule | default('05 03 * * *') }}"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: backup-db-catcm-treatment-core
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: backup-mongodb
+              image: "{{ backup.image | default('registry.cn-beijing.aliyuncs.com/36node/mongo-cleanandbackup') }}:{{ backup.image_tag | default('v0.1') }}"
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: MONGO_URI
+                  value: "{{ mongodb_connection }}"
+                - name: MONGO_FILE_PREFIX
+                  value: "{{ namespace }}"
+                - name: BACKUP_LATEST_FILE
+                  value: catcm-treatment-core.tar.gz
+                - name: BACKUP_SAVE_NUMS
+                  value: "{{ backup.retention | default(3) }}"
+                - name: MONGO_DB
+                  value: catcm-treatment-core
+              volumeMounts:
+                - name: backup-pv
+                  mountPath: /backup
+                  subPath: db
+          volumes:
+            - name: backup-pv
+              persistentVolumeClaim:
+                claimName: pvc-backup
+{% endif %}

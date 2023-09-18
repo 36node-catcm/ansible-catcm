@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: treatment-auth
+  labels:
+    app: treatment-auth
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: treatment-auth
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: treatment-auth
+  labels:
+    app: treatment-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: treatment-auth
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: treatment-auth
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: treatment-auth
+          image: "{{ auth_image }}"
+          imagePullPolicy: "{{ image_pull_policy }}"
+          env:
+            - name: DEPLOY_TIME
+              value: "{{ auth_time }}"
+            - name: APP_PORT
+              value: "{{ auth_port }}"
+            - name: APP_BASE
+              value: "{{ auth_path }}"
+            - name: APP_MONGODB_CONNECTION
+              value: "{{ treatment_auth_mongodb_connection }}"
+            - name: APP_SUPER_USERNAME
+              value: "{{ auth_super_username }}"
+            - name: APP_SUPER_PASSWORD
+              value: "{{ auth_super_password }}"
+          ports:
+            - name: http
+              containerPort: 80

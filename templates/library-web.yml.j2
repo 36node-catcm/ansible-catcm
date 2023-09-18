@@ -46,6 +46,10 @@ spec:
               value: "{{ library_web_time }}"
             - name: REACT_APP_CORE_BASE
               value: "{{ library_web_core_base }}"
+            - name: REACT_APP_AUTH_BASE
+              value: "{{ library_web_auth_base }}"
+            - name: REACT_APP_AUTH_PROVIDER
+              value: "{{ library_web_auth_provider }}"
           ports:
             - name: http
               containerPort: 80

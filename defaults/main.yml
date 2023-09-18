@@ -11,52 +11,67 @@ ingress_class: traefik
 ingress_name: catcm
 domain: catcm.36node.com
 mongodb_connection: mongodb://root:it_is_a_secret@mongodb
+mysql_connection: jdbc:mysql://mysql:3306
+mysql_username: root
+mysql_password: 36node
+
+auth_image: registry.cn-beijing.aliyuncs.com/36node/stargate-auth:v0
+auth_time: 20230918
+auth_port: "80"
+auth_path: /auth/v0
+auth_mongodb_connection: "{{ mongodb_connection }}/catcm-auth?authSource=admin"
+treatment_auth_mongodb_connection: "{{ mongodb_connection }}/catcm-treatment-auth?authSource=admin"
+auth_super_username: root
+auth_super_password: 36node
 
 library_core_version: latest
 library_core_image: "registry.cn-hongkong.aliyuncs.com/36node/catcm-library-core:{{ library_core_version }}"
 library_core_port: "80"
-library_core_path: /library/core/v0
-library_core_mongodb_connection: "{{ mongodb_connection }}/library-core?authSource=admin"
-library_core_health_path: /library/core/v0/health
-library_core_time: 20210804120000
+library_core_path: /core/v0
+library_core_mongodb_connection: "{{ mongodb_connection }}/catcm-library-core?authSource=admin"
+library_core_health_path: /core/v0/health
+library_core_time: 20230918
 
 library_web_version: latest
 library_web_image: "registry.cn-hongkong.aliyuncs.com/36node/catcm-library:{{ library_web_version }}"
-library_web_core_base: "https://api.{{ domain }}/library/core/v0"
-library_web_time: 20210804120000
+library_web_core_base: "https://library.{{ domain }}/core/v0"
+library_web_auth_base: "https://library.{{ domain }}/auth/v0"
+library_web_auth_provider: 5df461fccb1fd90011440a3e
+library_web_time: 20230918
 
 livedata_core_version: latest
 livedata_core_image: "registry.cn-beijing.aliyuncs.com/36node/catcm-livedata-core:{{ livedata_core_version }}"
 livedata_core_port: "80"
-livedata_core_path: /livedata/core/v0
-livedata_core_mongodb_connection: "{{ mongodb_connection }}/livedata-core?authSource=admin"
-livedata_core_health_path: /livedata/core/v0/health
-livedata_core_time: 20210804120000
+livedata_core_path: /core/v0
+livedata_core_mongodb_connection: "{{ mongodb_connection }}/catcm-livedata-core?authSource=admin"
+livedata_core_health_path: /core/v0/health
+livedata_core_time: 20230918
 
 livedata_web_version: latest
 livedata_web_image: "registry.cn-beijing.aliyuncs.com/36node/catcm-livedata:{{ livedata_web_version }}"
-livedata_web_core_base: "https://api.{{ domain }}/livedata/core/v0"
-livedata_web_time: 20210804120000
-livedata_web_root_ns: /catcm_uat
-livedata_web_auth_provider: 61c174bbc4a169001220e7b9
-livedata_web_oss_bucket: 36node-upload-test
+livedata_web_core_base: "https://livedata.{{ domain }}/core/v0"
+livedata_web_time: 20230918
+livedata_web_root_ns: /catcm/livedata
+livedata_web_auth_provider: 5e1136815ad4ee001156acf3
+livedata_web_auth_base: "https://livedata.{{ domain }}/auth/v0"
+livedata_web_oss_bucket: 36node-catcm
 
 treatment_core_version: latest
 treatment_core_image: "registry.cn-beijing.aliyuncs.com/36node/catcm-livedata-core:{{ treatment_core_version }}"
 treatment_core_port: "80"
-treatment_core_path: /treatment/core/v0
-treatment_core_mongodb_connection: "{{ mongodb_connection }}/treatment-core?authSource=admin"
-treatment_core_health_path: /treatment/core/v0/health
-treatment_core_time: 20210804120000
+treatment_core_path: /core/v0
+treatment_core_mongodb_connection: "{{ mongodb_connection }}/catcm-treatment-core?authSource=admin"
+treatment_core_health_path: /core/v0/health
+treatment_core_time: 20230918
 
 treatment_web_version: latest
 treatment_web_image: "registry.cn-beijing.aliyuncs.com/36node/catcm-livedata:{{ treatment_web_version }}"
-treatment_web_core_base: "https://api.{{ domain }}/treatment/core/v0"
-treatment_web_time: 20210804120000
-treatment_web_root_ns: /catcm_uat
-treatment_web_auth_provider: 61c174bbc4a169001220e7b9
-treatment_web_auth_base: https://api.stargate.36node.com/auth/v0
-treatment_web_oss_bucket: 36node-upload-test
+treatment_web_core_base: "https://treatment.{{ domain }}/core/v0"
+treatment_web_time: 20230918
+treatment_web_root_ns: /catcm/treatment
+treatment_web_auth_provider: 62010e940c3b730012892696
+treatment_web_auth_base: "https://treatment.{{ domain }}/auth/v0"
+treatment_web_oss_bucket: 36node-catcm
 
 www_web_time: 20220509
 www_web_image_version: "1.1"
@@ -64,6 +79,6 @@ www_web_image: "registry.cn-beijing.aliyuncs.com/cacms/cacms_ui:{{ www_web_image
 www_service_time: 20220509
 www_service_image_version: "1.1"
 www_service_image: "registry.cn-beijing.aliyuncs.com/cacms/cacms:{{ www_service_image_version }}"
-www_service_mysql_url: "jdbc:mysql://mysql:3306/xlsy?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC"
-www_service_mysql_username: "root"
-www_service_mysql_password: "754d59aebbfc"
+www_service_mysql_url: "{{ mysql_connection }}/catcm-xlsy?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC"
+www_service_mysql_username: "{{ mysql_username }}"
+www_service_mysql_password: "{{ mysql_password }}"
