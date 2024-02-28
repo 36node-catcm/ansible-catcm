@@ -1,14 +1,14 @@
 ---
 # tasks file for catcm
 - name: Namespace for catcm
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     state: "{{ catcm_state }}"
     name: "{{ catcm_namespace }}"
     api_version: v1
     kind: Namespace
 
 - name: catcm service
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     state: "{{ catcm_state }}"
     namespace: "{{ catcm_namespace }}"
     template: "{{ item }}"
