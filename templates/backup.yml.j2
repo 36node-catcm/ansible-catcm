@@ -117,7 +117,7 @@ spec:
               volumeMounts:
                 - name: backup-pv
                   mountPath: /backup
-                  subPath: db
+                  subPath: db/catcm-auth
           volumes:
             - name: backup-pv
               persistentVolumeClaim:
@@ -161,7 +161,7 @@ spec:
               volumeMounts:
                 - name: backup-pv
                   mountPath: /backup
-                  subPath: db
+                  subPath: db/library-core
           volumes:
             - name: backup-pv
               persistentVolumeClaim:
@@ -205,7 +205,7 @@ spec:
               volumeMounts:
                 - name: backup-pv
                   mountPath: /backup
-                  subPath: db
+                  subPath: db/livedata-core
           volumes:
             - name: backup-pv
               persistentVolumeClaim:
@@ -249,7 +249,7 @@ spec:
               volumeMounts:
                 - name: backup-pv
                   mountPath: /backup
-                  subPath: db
+                  subPath: db/treatment-auth
           volumes:
             - name: backup-pv
               persistentVolumeClaim:
@@ -293,7 +293,7 @@ spec:
               volumeMounts:
                 - name: backup-pv
                   mountPath: /backup
-                  subPath: db
+                  subPath: db/treatment-core
           volumes:
             - name: backup-pv
               persistentVolumeClaim:
