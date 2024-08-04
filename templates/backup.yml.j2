@@ -1,5 +1,6 @@
 #jinja2: lstrip_blocks: "True", trim_blocks: "True"
 {% if backup.enabled %}
+{% if backup.host_path is not defined %}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -12,6 +13,7 @@ spec:
     requests:
       storage: "{{ backup.storageSize | default('2Gi') }}"
   storageClassName: "{{ backup.storageClass | default(fs_storage_class) }}"
+{% endif %}
 
 ---
 apiVersion: v1
@@ -74,9 +76,18 @@ spec:
               mountPath: /var/lib/dav/data
       volumes:
         - name: backup-pv
+        {% if backup.host_path %}
+          hostPath:
+            path: "{{ backup.host_path }}"
+            type: DirectoryOrCreate
+        {% else %}
           persistentVolumeClaim:
             claimName: pvc-backup
-
+        {% endif %}
+      {% if backup.node_selector %}
+      nodeSelector: 
+        kubernetes.io/hostname: "{{ backup.node_selector }}"
+      {% endif %}
 ---
 
 # 配置参考 https://github.com/36node-fcp/devops/blob/main/v2-backup/docker/mongo-cleanandbackup/README.MD
@@ -120,9 +131,18 @@ spec:
                   subPath: db/catcm-auth
           volumes:
             - name: backup-pv
+            {% if backup.host_path %}
+              hostPath:
+                path: "{{ backup.host_path }}"
+                type: DirectoryOrCreate
+            {% else %}
               persistentVolumeClaim:
                 claimName: pvc-backup
-
+            {% endif %}
+          {% if backup.node_selector %}
+          nodeSelector: 
+            kubernetes.io/hostname: "{{ backup.node_selector }}"
+          {% endif %}
 ---
 
 apiVersion: batch/v1
@@ -164,8 +184,18 @@ spec:
                   subPath: db/library-core
           volumes:
             - name: backup-pv
+            {% if backup.host_path %}
+              hostPath:
+                path: "{{ backup.host_path }}"
+                type: DirectoryOrCreate
+            {% else %}
               persistentVolumeClaim:
                 claimName: pvc-backup
+            {% endif %}
+          {% if backup.node_selector %}
+          nodeSelector: 
+            kubernetes.io/hostname: "{{ backup.node_selector }}"
+          {% endif %}
 
 ---
 
@@ -208,8 +238,18 @@ spec:
                   subPath: db/livedata-core
           volumes:
             - name: backup-pv
+            {% if backup.host_path %}
+              hostPath:
+                path: "{{ backup.host_path }}"
+                type: DirectoryOrCreate
+            {% else %}
               persistentVolumeClaim:
                 claimName: pvc-backup
+            {% endif %}
+          {% if backup.node_selector %}
+          nodeSelector: 
+            kubernetes.io/hostname: "{{ backup.node_selector }}"
+          {% endif %}
 
 ---
 
@@ -252,8 +292,18 @@ spec:
                   subPath: db/treatment-auth
           volumes:
             - name: backup-pv
+            {% if backup.host_path %}
+              hostPath:
+                path: "{{ backup.host_path }}"
+                type: DirectoryOrCreate
+            {% else %}
               persistentVolumeClaim:
                 claimName: pvc-backup
+            {% endif %}
+          {% if backup.node_selector %}
+          nodeSelector: 
+            kubernetes.io/hostname: "{{ backup.node_selector }}"
+          {% endif %}
 
 ---
 
@@ -296,6 +346,16 @@ spec:
                   subPath: db/treatment-core
           volumes:
             - name: backup-pv
+            {% if backup.host_path %}
+              hostPath:
+                path: "{{ backup.host_path }}"
+                type: DirectoryOrCreate
+            {% else %}
               persistentVolumeClaim:
                 claimName: pvc-backup
+            {% endif %}
+          {% if backup.node_selector %}
+          nodeSelector: 
+            kubernetes.io/hostname: "{{ backup.node_selector }}"
+          {% endif %}
 {% endif %}
